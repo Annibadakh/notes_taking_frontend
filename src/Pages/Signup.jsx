@@ -450,7 +450,7 @@ const Signup = () => {
                   <div className="flex-1 border-t border-gray-300"></div>
                 </div>
 
-                <div id="google-btn" className="w-full mb-6"></div>
+                <div id="google-btn" className="w-full text-center mb-6"></div>
               </>
             )}
 

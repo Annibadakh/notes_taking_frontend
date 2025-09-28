@@ -256,7 +256,7 @@ const Login = () => {
               <div className="flex-1 border-t border-gray-300"></div>
             </div>
 
-            <div id="google-btn" className="w-full"></div>
+            <div id="google-btn" className="w-full text-center"></div>
 
             <p className="mt-8 text-center text-sm text-gray-600">
               Don't have an account?{" "}
