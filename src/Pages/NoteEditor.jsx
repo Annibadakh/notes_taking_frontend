@@ -130,6 +130,7 @@ const NoteEditor = () => {
         navigate('/dashboard');
       }, 1000);
     } catch (error) {
+        // console.log(error);
       toast.error(`Failed to ${isEditing ? 'update' : 'create'} note`);
     } finally {
       setSaving(false);
