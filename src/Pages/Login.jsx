@@ -255,9 +255,9 @@ const Login = () => {
               <span className="px-4 text-sm text-gray-500">OR</span>
               <div className="flex-1 border-t border-gray-300"></div>
             </div>
-
-            <div id="google-btn" className="w-full text-center"></div>
-
+            <div className="w-full grid place-items-center">
+            <div id="google-btn" className="w-full"></div>
+            </div>
             <p className="mt-8 text-center text-sm text-gray-600">
               Don't have an account?{" "}
               <a href="/signup" className="text-blue-500 hover:text-blue-600 font-medium">

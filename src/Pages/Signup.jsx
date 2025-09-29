@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import {useAuth} from "../Context/AuthContext";
 import { useToast, LoadingOverlay, SuccessModal } from "../Utils/toast";
 import loginImg from "../Assets/loginImg.jpg";
 import logo from "../Assets/HDlogo.png";
@@ -9,6 +10,7 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 const Signup = () => {
   const navigate = useNavigate();
+  const { user, login } = useAuth();
   const { toast } = useToast();
 
   const [form, setForm] = useState({
@@ -23,6 +25,12 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successModalData, setSuccessModalData] = useState({});
+
+
+  useEffect(() => {
+    if (user) navigate("/dashboard");
+  }, [user, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -157,11 +165,8 @@ const Signup = () => {
       setLoading(true);
       setLoadingMessage("Resending verification code...");
       
-      const res = await axios.post(`${API_BASE}/signup/register`, {
-        username: form.username.trim(),
+      const res = await axios.post(`${API_BASE}/signup/resend-otp`, {
         email: form.email.trim().toLowerCase(),
-        password: form.password,
-        dob: form.dob,
       });
 
       toast.success("New verification code sent to your email!");
@@ -183,12 +188,25 @@ const Signup = () => {
         token: credential,
       });
 
+      login(res.data.user, res.data.token);
       setLoading(false);
-      setShowSuccessModal(true);
       
+      setSuccessModalData({
+        title: "Welcome!",
+        message: "You have been successfully register && logged in with Google."
+      });
+      setShowSuccessModal(true);
+      toast.success("You have been successfully logged in.");
       setTimeout(() => {
         navigate("/dashboard");
-      }, 2500);
+      }, 2000);
+
+      // setLoading(false);
+      // setShowSuccessModal(true);
+      
+      // setTimeout(() => {
+      //   navigate("/dashboard");
+      // }, 2500);
     } catch (err) {
       setLoading(false);
       const errorMessage = err.response?.data?.message || "Google signup failed";
@@ -231,7 +249,13 @@ const Signup = () => {
   return (
     <>
       <LoadingOverlay isVisible={loading} message={loadingMessage} />
-
+      <SuccessModal
+        isOpen={showSuccessModal}
+        title={successModalData.title}
+        message={successModalData.message}
+        onClose={() => setShowSuccessModal(false)}
+        showRedirectMessage={true}
+      />
       <SuccessModal
         isOpen={showSuccessModal}
         title="Welcome to HD! 🎉"

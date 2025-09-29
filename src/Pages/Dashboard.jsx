@@ -13,7 +13,6 @@ import {
   ArchiveBoxIcon,
   ArchiveBoxArrowDownIcon,
   StarIcon,
-  ChartBarIcon,
   EyeIcon,
   EyeSlashIcon
 } from "@heroicons/react/24/outline";
@@ -44,7 +43,7 @@ const Dashboard = () => {
     totalWords: 0
   });
   const [showArchived, setShowArchived] = useState(false);
-  const [showStatsModal, setShowStatsModal] = useState(false);
+  const [actionLoading, setActionLoading] = useState({});
 
   const notesPerPage = 6;
 
@@ -78,7 +77,6 @@ const Dashboard = () => {
   const fetchStats = async () => {
     try {
       const response = await api.get(`/notes/stats`);
-      // console.log(response.data.data);
       setStats(response.data.data);
     } catch (error) {
       console.error("Failed to fetch stats:", error);
@@ -101,6 +99,7 @@ const Dashboard = () => {
 
   const handleToggleArchive = async (noteId, e) => {
     e.stopPropagation();
+    setActionLoading(prev => ({ ...prev, [`archive-${noteId}`]: true }));
     try {
       const response = await api.patch(`/notes/${noteId}/archive`);
       toast.success(response.data.message);
@@ -108,11 +107,14 @@ const Dashboard = () => {
       fetchStats();
     } catch (error) {
       toast.error("Failed to archive/unarchive note");
+    } finally {
+      setActionLoading(prev => ({ ...prev, [`archive-${noteId}`]: false }));
     }
   };
 
   const handleTogglePin = async (noteId, e) => {
     e.stopPropagation();
+    setActionLoading(prev => ({ ...prev, [`pin-${noteId}`]: true }));
     try {
       const response = await api.patch(`/notes/${noteId}/pin`);
       toast.success(response.data.message);
@@ -120,6 +122,8 @@ const Dashboard = () => {
       fetchStats();
     } catch (error) {
       toast.error("Failed to pin/unpin note");
+    } finally {
+      setActionLoading(prev => ({ ...prev, [`pin-${noteId}`]: false }));
     }
   };
 
@@ -176,21 +180,12 @@ const Dashboard = () => {
               <div className="text-xl font-semibold text-gray-900">HD Notes</div>
             </div>
             
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setShowStatsModal(true)}
-                className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800 transition-all"
-              >
-                <ChartBarIcon className="h-4 w-4" />
-                <span className="hidden sm:inline">Stats</span>
-              </button>
-              <button
-                onClick={logout}
-                className="text-sm text-red-600 underline hover:text-red-700 font-medium"
-              >
-                Logout
-              </button>
-            </div>
+            <button
+              onClick={logout}
+              className="text-sm text-red-600 underline hover:text-red-700 font-medium"
+            >
+              Logout
+            </button>
           </div>
         </div>
       </header>
@@ -202,9 +197,53 @@ const Dashboard = () => {
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
             Welcome, {user?.username}!
           </h1>
-          <h1 className="text-xl sm:text-lg text-gray-900 mb-2">
+          <p className="text-lg text-gray-600 mb-6">
             Email: {user?.email}
-          </h1>
+          </p>
+
+          {/* Statistics Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
+            <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-4 text-white shadow-md">
+              <div className="flex items-center justify-between mb-2">
+                <DocumentTextIcon className="h-6 w-6 opacity-80" />
+              </div>
+              <div className="text-2xl font-bold mb-1">{stats.totalNotes}</div>
+              <div className="text-sm opacity-90">Total Notes</div>
+            </div>
+
+            <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg p-4 text-white shadow-md">
+              <div className="flex items-center justify-between mb-2">
+                <StarIcon className="h-6 w-6 opacity-80" />
+              </div>
+              <div className="text-2xl font-bold mb-1">{stats.pinnedNotes}</div>
+              <div className="text-sm opacity-90">Pinned</div>
+            </div>
+
+            <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg p-4 text-white shadow-md">
+              <div className="flex items-center justify-between mb-2">
+                <ArchiveBoxIcon className="h-6 w-6 opacity-80" />
+              </div>
+              <div className="text-2xl font-bold mb-1">{stats.archivedNotes}</div>
+              <div className="text-sm opacity-90">Archived</div>
+            </div>
+
+            <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-4 text-white shadow-md">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-lg font-semibold opacity-80">Aa</span>
+              </div>
+              <div className="text-2xl font-bold mb-1">{formatNumber(stats.totalCharacters)}</div>
+              <div className="text-sm opacity-90">Characters</div>
+            </div>
+
+            <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-4 text-white shadow-md">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-lg font-semibold opacity-80">W</span>
+              </div>
+              <div className="text-2xl font-bold mb-1">{formatNumber(stats.totalWords)}</div>
+              <div className="text-sm opacity-90">Words</div>
+            </div>
+          </div>
+
           <p className="text-gray-600">
             You have {totalNotes} {showArchived ? 'archived' : 'active'} {totalNotes === 1 ? 'note' : 'notes'} in your collection
           </p>
@@ -311,26 +350,34 @@ const Dashboard = () => {
                       <div className="flex gap-1 ml-2">
                         <button
                           onClick={(e) => handleTogglePin(note.id, e)}
-                          className={`p-1.5 rounded-md transition-all ${
+                          disabled={actionLoading[`pin-${note.id}`]}
+                          className={`p-1.5 rounded-md transition-all relative ${
                             note.isPinned
                               ? 'text-yellow-600 hover:bg-yellow-100'
                               : 'text-gray-400 hover:text-yellow-600 hover:bg-yellow-50'
-                          }`}
+                          } ${actionLoading[`pin-${note.id}`] ? 'opacity-50 cursor-not-allowed' : ''}`}
                           title={note.isPinned ? 'Unpin note' : 'Pin note'}
                         >
-                          <StarIcon className="h-4 w-4" />
+                          {actionLoading[`pin-${note.id}`] ? (
+                            <div className="h-4 w-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                          ) : (
+                            <StarIcon className="h-4 w-4" />
+                          )}
                         </button>
                         
                         <button
                           onClick={(e) => handleToggleArchive(note.id, e)}
-                          className={`p-1.5 rounded-md transition-all ${
+                          disabled={actionLoading[`archive-${note.id}`]}
+                          className={`p-1.5 rounded-md transition-all relative ${
                             note.isArchived
                               ? 'text-orange-600 hover:bg-orange-100'
                               : 'text-gray-400 hover:text-orange-600 hover:bg-orange-50'
-                          }`}
+                          } ${actionLoading[`archive-${note.id}`] ? 'opacity-50 cursor-not-allowed' : ''}`}
                           title={note.isArchived ? 'Unarchive note' : 'Archive note'}
                         >
-                          {note.isArchived ? (
+                          {actionLoading[`archive-${note.id}`] ? (
+                            <div className="h-4 w-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                          ) : note.isArchived ? (
                             <ArchiveBoxArrowDownIcon className="h-4 w-4" />
                           ) : (
                             <ArchiveBoxIcon className="h-4 w-4" />
@@ -440,50 +487,6 @@ const Dashboard = () => {
           </>
         )}
       </main>
-
-      {/* Stats Modal */}
-      {showStatsModal && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Your Notes Statistics</h3>
-              <button
-                onClick={() => setShowStatsModal(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                ×
-              </button>
-            </div>
-            
-            <div className="space-y-4">
-              <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                <span className="text-gray-600">Total Notes</span>
-                <span className="font-semibold text-blue-600">{stats.totalNotes}</span>
-              </div>
-              
-              <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                <span className="text-gray-600">Pinned Notes</span>
-                <span className="font-semibold text-yellow-600">{stats.pinnedNotes}</span>
-              </div>
-              
-              <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                <span className="text-gray-600">Archived Notes</span>
-                <span className="font-semibold text-orange-600">{stats.archivedNotes}</span>
-              </div>
-              
-              <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                <span className="text-gray-600">Total Characters</span>
-                <span className="font-semibold text-green-600">{formatNumber(stats.totalCharacters)}</span>
-              </div>
-              
-              <div className="flex justify-between items-center py-2">
-                <span className="text-gray-600">Total Words</span>
-                <span className="font-semibold text-purple-600">{formatNumber(stats.totalWords)}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Delete Confirmation Modal */}
       {deleteModalOpen && (

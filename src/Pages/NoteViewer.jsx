@@ -8,7 +8,10 @@ import {
   TrashIcon,
   ShareIcon,
   CalendarIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  StarIcon,
+  ArchiveBoxIcon,
+  ArchiveBoxArrowDownIcon
 } from "@heroicons/react/24/outline";
 import logo from "../Assets/HDlogo.png";
 import api from "../Api";
@@ -24,6 +27,10 @@ const NoteViewer = () => {
   const [note, setNote] = useState(null);
   const [loading, setLoading] = useState(true);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [actionLoading, setActionLoading] = useState({
+    pin: false,
+    archive: false
+  });
 
   useEffect(() => {
     fetchNote();
@@ -33,10 +40,9 @@ const NoteViewer = () => {
     try {
       setLoading(true);
       const response = await api.get(`/notes/getnote/${id}`);
-    //   console.log(response.data);
       setNote(response.data.data);
     } catch (error) {
-        console.log(error);
+      console.log(error);
       toast.error("Failed to fetch note");
       navigate('/dashboard');
     } finally {
@@ -52,6 +58,32 @@ const NoteViewer = () => {
       navigate('/dashboard');
     } catch (error) {
       toast.error("Failed to delete note");
+    }
+  };
+
+  const handleToggleArchive = async () => {
+    setActionLoading(prev => ({ ...prev, archive: true }));
+    try {
+      const response = await api.patch(`/notes/${id}/archive`);
+      toast.success(response.data.message);
+      fetchNote();
+    } catch (error) {
+      toast.error("Failed to archive/unarchive note");
+    } finally {
+      setActionLoading(prev => ({ ...prev, archive: false }));
+    }
+  };
+
+  const handleTogglePin = async () => {
+    setActionLoading(prev => ({ ...prev, pin: true }));
+    try {
+      const response = await api.patch(`/notes/${id}/pin`);
+      toast.success(response.data.message);
+      fetchNote();
+    } catch (error) {
+      toast.error("Failed to pin/unpin note");
+    } finally {
+      setActionLoading(prev => ({ ...prev, pin: false }));
     }
   };
 
@@ -80,6 +112,7 @@ const NoteViewer = () => {
           url: window.location.href
         });
       } catch (error) {
+        // User cancelled share
       }
     } else {
       try {
@@ -143,6 +176,43 @@ const NoteViewer = () => {
               >
                 <ShareIcon className="h-5 w-5" />
               </button>
+              
+              <button
+                onClick={handleTogglePin}
+                disabled={actionLoading.pin}
+                className={`p-2 rounded-lg transition-all ${
+                  note.isPinned
+                    ? 'text-yellow-600 hover:bg-yellow-50'
+                    : 'text-gray-600 hover:text-yellow-600 hover:bg-yellow-50'
+                } ${actionLoading.pin ? 'opacity-50 cursor-not-allowed' : ''}`}
+                title={note.isPinned ? 'Unpin note' : 'Pin note'}
+              >
+                {actionLoading.pin ? (
+                  <div className="h-5 w-5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                ) : (
+                  <StarIcon className="h-5 w-5" />
+                )}
+              </button>
+              
+              <button
+                onClick={handleToggleArchive}
+                disabled={actionLoading.archive}
+                className={`p-2 rounded-lg transition-all ${
+                  note.isArchived
+                    ? 'text-orange-600 hover:bg-orange-50'
+                    : 'text-gray-600 hover:text-orange-600 hover:bg-orange-50'
+                } ${actionLoading.archive ? 'opacity-50 cursor-not-allowed' : ''}`}
+                title={note.isArchived ? 'Unarchive note' : 'Archive note'}
+              >
+                {actionLoading.archive ? (
+                  <div className="h-5 w-5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                ) : note.isArchived ? (
+                  <ArchiveBoxArrowDownIcon className="h-5 w-5" />
+                ) : (
+                  <ArchiveBoxIcon className="h-5 w-5" />
+                )}
+              </button>
+              
               <button
                 onClick={() => navigate(`/notes/edit/${note.id}`)}
                 className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
@@ -150,6 +220,7 @@ const NoteViewer = () => {
               >
                 <PencilSquareIcon className="h-5 w-5" />
               </button>
+              
               <button
                 onClick={() => setDeleteModalOpen(true)}
                 className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
@@ -165,7 +236,21 @@ const NoteViewer = () => {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <article className="bg-white rounded-lg shadow-sm border border-gray-200">
           <header className="border-b border-gray-200 p-6">
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">{note.title}</h1>
+            <div className="flex items-start justify-between mb-4">
+              <h1 className="text-3xl font-bold text-gray-900 flex-1">{note.title}</h1>
+              <div className="flex gap-2 ml-4">
+                {note.isPinned && (
+                  <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-xs font-medium">
+                    Pinned
+                  </span>
+                )}
+                {note.isArchived && (
+                  <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs font-medium">
+                    Archived
+                  </span>
+                )}
+              </div>
+            </div>
             
             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
               <div className="flex items-center gap-1">
@@ -203,12 +288,60 @@ const NoteViewer = () => {
 
         <div className="lg:hidden mt-6 flex gap-3">
           <button
+            onClick={handleTogglePin}
+            disabled={actionLoading.pin}
+            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-all ${
+              note.isPinned
+                ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            } ${actionLoading.pin ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {actionLoading.pin ? (
+              <div className="h-5 w-5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+            ) : (
+              <>
+                <StarIcon className="h-5 w-5" />
+                {note.isPinned ? 'Unpin' : 'Pin'}
+              </>
+            )}
+          </button>
+          
+          <button
+            onClick={handleToggleArchive}
+            disabled={actionLoading.archive}
+            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-all ${
+              note.isArchived
+                ? 'bg-orange-100 text-orange-700 hover:bg-orange-200'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            } ${actionLoading.archive ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {actionLoading.archive ? (
+              <div className="h-5 w-5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+            ) : (
+              <>
+                {note.isArchived ? (
+                  <>
+                    <ArchiveBoxArrowDownIcon className="h-5 w-5" />
+                    Unarchive
+                  </>
+                ) : (
+                  <>
+                    <ArchiveBoxIcon className="h-5 w-5" />
+                    Archive
+                  </>
+                )}
+              </>
+            )}
+          </button>
+          
+          <button
             onClick={() => navigate(`/notes/edit/${note.id}`)}
             className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-all"
           >
             <PencilSquareIcon className="h-5 w-5" />
-            Edit Note
+            Edit
           </button>
+          
           <button
             onClick={() => setDeleteModalOpen(true)}
             className="flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 transition-all"
@@ -218,7 +351,6 @@ const NoteViewer = () => {
           </button>
         </div>
       </main>
-
 
       {deleteModalOpen && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4 z-50">
