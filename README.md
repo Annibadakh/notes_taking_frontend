@@ -60,6 +60,7 @@ A modern, mobile-first note-taking web application built with React, Tailwind CS
 
 2. **Set up the backend**
    ```bash
+   git clone https://github.com/Annibadakh/notes_taking_backend
    cd notes_taking_backend
    npm install
    ```
@@ -84,7 +85,7 @@ A modern, mobile-first note-taking web application built with React, Tailwind CS
    # JWT
    JWT_SECRET=your_jwt_secret_key
    
-   # Email (for OTP via Nodemailer)
+   # Email
    EMAIL_USER=your_email@gmail.com
    EMAIL_PASS=your_email_password
    
