@@ -202,7 +202,7 @@ const Dashboard = () => {
           </p>
 
           {/* Statistics Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
             <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-4 text-white shadow-md">
               <div className="flex items-center justify-between mb-2">
                 <DocumentTextIcon className="h-6 w-6 opacity-80" />
@@ -227,13 +227,13 @@ const Dashboard = () => {
               <div className="text-sm opacity-90">Archived</div>
             </div>
 
-            <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-4 text-white shadow-md">
+            {/* <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-4 text-white shadow-md">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-lg font-semibold opacity-80">Aa</span>
               </div>
               <div className="text-2xl font-bold mb-1">{formatNumber(stats.totalCharacters)}</div>
               <div className="text-sm opacity-90">Characters</div>
-            </div>
+            </div> */}
 
             <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-4 text-white shadow-md">
               <div className="flex items-center justify-between mb-2">

@@ -14,7 +14,7 @@ const HomePage = () => {
     {
       icon: <Edit3 className="w-6 h-6" />,
       title: "Rich Text Editing",
-      description: "Format your notes with bold, italic, colors, and organized lists"
+      description: "Format your notes with bold, italic, colors, and underlined"
     },
     {
       icon: <Shield className="w-6 h-6" />,
@@ -48,7 +48,7 @@ const HomePage = () => {
     "Secure user authentication with multiple options",
     "Mobile-responsive design for on-the-go access",
     "Paginated note organization",
-    "Character count and auto-save features",
+    // "Character count and auto-save features",
     "Modern, intuitive interface"
   ];
 
@@ -122,7 +122,7 @@ const HomePage = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-green-500" />
-                  <span>No credit card required</span>
+                  <span>Easy Sign up</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-green-500" />
@@ -230,7 +230,7 @@ const HomePage = () => {
               onClick={() => window.location.href = '/signup'}
               className="group px-8 py-4 bg-white text-blue-600 font-semibold rounded-2xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 flex items-center gap-2 justify-center min-w-[200px]"
             >
-              Create Free Account
+              Create Account
               <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
             

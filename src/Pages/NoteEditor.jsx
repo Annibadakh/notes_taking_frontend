@@ -186,8 +186,8 @@ const NoteEditor = () => {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      // hour: '2-digit',
+      // minute: '2-digit'
     });
   };
 
@@ -201,7 +201,7 @@ const NoteEditor = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white shadow-sm">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center gap-4">
@@ -260,7 +260,7 @@ const NoteEditor = () => {
               {isEditing && (
                 <>
                   <div>•</div>
-                  <div>Last modified: {new Date().toLocaleDateString()}</div>
+                  <div>Last modified: {new Date().toLocaleDateString("en-GB")}</div>
                 </>
               )}
             </div>

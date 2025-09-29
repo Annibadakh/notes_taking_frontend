@@ -152,7 +152,7 @@ const NoteViewer = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white shadow-sm">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center gap-4">
@@ -260,6 +260,7 @@ const NoteViewer = () => {
               
               {note.updatedAt !== note.createdAt && (
                 <div className="flex items-center gap-1">
+                  <CalendarIcon className="h-4 w-4" />
                   <span>Updated: {formatDate(note.updatedAt)}</span>
                 </div>
               )}
@@ -287,7 +288,7 @@ const NoteViewer = () => {
         </article>
 
         <div className="lg:hidden mt-6 flex gap-3">
-          <button
+          {/* <button
             onClick={handleTogglePin}
             disabled={actionLoading.pin}
             className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-all ${
@@ -304,9 +305,9 @@ const NoteViewer = () => {
                 {note.isPinned ? 'Unpin' : 'Pin'}
               </>
             )}
-          </button>
+          </button> */}
           
-          <button
+          {/* <button
             onClick={handleToggleArchive}
             disabled={actionLoading.archive}
             className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-all ${
@@ -332,7 +333,7 @@ const NoteViewer = () => {
                 )}
               </>
             )}
-          </button>
+          </button> */}
           
           <button
             onClick={() => navigate(`/notes/edit/${note.id}`)}
@@ -344,7 +345,7 @@ const NoteViewer = () => {
           
           <button
             onClick={() => setDeleteModalOpen(true)}
-            className="flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 transition-all"
+            className="flex-1 flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 transition-all"
           >
             <TrashIcon className="h-5 w-5" />
             Delete
